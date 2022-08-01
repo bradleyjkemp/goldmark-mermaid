@@ -23,7 +23,6 @@ type Renderer struct {
 // Goldmark Registerer.
 func (r *Renderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	reg.Register(Kind, r.Render)
-	reg.Register(ScriptKind, r.RenderScript)
 }
 
 // Render renders mermaid.Block nodes.
@@ -39,24 +38,5 @@ func (*Renderer) Render(w util.BufWriter, src []byte, node ast.Node, entering bo
 	} else {
 		w.WriteString("</div>")
 	}
-	return ast.WalkContinue, nil
-}
-
-// RenderScript renders mermaid.ScriptBlock nodes.
-func (r *Renderer) RenderScript(w util.BufWriter, src []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
-	mermaidJS := r.MermaidJS
-	if len(mermaidJS) == 0 {
-		mermaidJS = _defaultMermaidJS
-	}
-
-	_ = node.(*ScriptBlock) // sanity check
-	if entering {
-		w.WriteString(`<script src="`)
-		w.WriteString(mermaidJS)
-		w.WriteString(`"></script>`)
-	} else {
-		w.WriteString("<script>mermaid.initialize({startOnLoad: true});</script>")
-	}
-
 	return ast.WalkContinue, nil
 }
